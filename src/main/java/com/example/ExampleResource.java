@@ -3,7 +3,6 @@ package com.example;
 import com.example.service.RestClientService;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -16,6 +15,7 @@ import org.jboss.logging.Logger;
 
 @Path("/test")
 public class ExampleResource {
+
     private static final Logger LOG = Logger.getLogger(ExampleResource.class);
 
     @Inject
@@ -34,13 +34,13 @@ public class ExampleResource {
     @Path("/doTest")
     public Multi<String> doTest() {
         return Multi.createFrom()
-             .items(IntStream.range(0,300).boxed())
-             .onItem()
-             .transformToUniAndMerge(
-                 num -> {
-                     LOG.info( "start: " + num);
-                     return restClientService.test( num ).onItem().invoke(LOG::info);
-                 }
-             );
+                    .items(IntStream.range(0, 300).boxed())
+                    .onItem()
+                    .invoke(LOG::info)
+                    .onItem()
+                    .transformToUniAndMerge(
+                        num -> restClientService.test(num).onItem()
+                                            .invoke(LOG::info)
+                    );
     }
 }
